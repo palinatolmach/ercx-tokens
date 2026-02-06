@@ -2,9 +2,9 @@
 pragma solidity >=0.6.2 <0.9.0;
 
 import "../ERCAbstract.sol";
-import {IERC1155} from "openzeppelin-contracts/token/ERC1155/IERC1155.sol";
-import {IERC1155Receiver} from "openzeppelin-contracts/token/ERC1155/IERC1155Receiver.sol";
-import {ERC1155ReceiverMock} from "openzeppelin-contracts/mocks/token/ERC1155ReceiverMock.sol";
+import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import {IERC1155Receiver} from "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import {ERC1155ReceiverMock} from "@openzeppelin/contracts/mocks/token/ERC1155ReceiverMock.sol";
 
 /// @notice Abstract contract that defines internal functions that are used in ERC1155 test suite
 abstract contract ERC1155Abstract is ERCAbstract {
@@ -163,12 +163,13 @@ abstract contract ERC1155Abstract is ERCAbstract {
     /// Otherwise, include an additional "bytes4 _otherRecRetVal" input for the test function and 
     /// let the fuzz mechanism take care of the random bytes4 return value.
     /// Same goes for _correctBatRetVal and _otherBatRetVal.
-    /// @dev If _recReverts set to true, then the contract receiver will always revert when receiving tokens.
-    /// Same goes for _batReverts.
+    /// @dev If _recReverts OR _batReverts is set to true, then the contract receiver will revert.
+    /// Note: In v5, both single and batch transfers use the same revert behavior.
     function _setUpReceiverContract(bool _correctRecRetVal, bytes4 _otherRecRetVal, bool _recReverts, bool _correctBatRetVal, bytes4 _otherBatRetVal, bool _batReverts)
     internal returns (IERC1155Receiver) {
         bytes4 _recRetval;
         bytes4 _batRetval;
+        
         // if _correctRecRecVal is set to true, the receiver contract will return the correct
         // bytes4 return value, which is `onERC1155Received(address,address,uint256,uint256,bytes)`
         if (_correctRecRetVal) {
@@ -180,6 +181,7 @@ abstract contract ERC1155Abstract is ERCAbstract {
             vm.assume(_otherRecRetVal != IERC1155Receiver.onERC1155Received.selector);
             _recRetval = _otherRecRetVal;
         }
+        
         // if _correctBatRecVal is set to true, the receiver contract will return the correct
         // bytes4 return value, which is `onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)`
         if (_correctBatRetVal) {
@@ -190,8 +192,16 @@ abstract contract ERC1155Abstract is ERCAbstract {
             vm.assume(_otherBatRetVal != IERC1155Receiver.onERC1155BatchReceived.selector);
             _batRetval = _otherBatRetVal;
         }
-        // Set up the receiver contract accordingly and return it as output
-        ERC1155ReceiverMock receiverContract = new ERC1155ReceiverMock(_recRetval, _recReverts, _batRetval, _batReverts);
+        
+        // Determine the revert type based on the input flags
+        ERC1155ReceiverMock.RevertType revertType;
+        if (_recReverts || _batReverts) {
+            revertType = ERC1155ReceiverMock.RevertType.RevertWithMessage;
+        } else {
+            revertType = ERC1155ReceiverMock.RevertType.None;
+        }
+        
+        ERC1155ReceiverMock receiverContract = new ERC1155ReceiverMock(_recRetval, _batRetval, revertType);
         return IERC1155Receiver(address(receiverContract));
     }
 

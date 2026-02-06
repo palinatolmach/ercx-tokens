@@ -2,7 +2,7 @@
 pragma solidity >=0.6.2 <0.9.0;
 
 import "../ERCAbstract.sol";
-import "openzeppelin-contracts/interfaces/IERC4626.sol";
+import "@openzeppelin/contracts/interfaces/IERC4626.sol";
 
 /// @notice Abstract contract that defines internal functions that are used in ERC4626 test suite
 abstract contract ERC4626Abstract is ERCAbstract {
