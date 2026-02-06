@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.6.2 <0.9.0;
 
-import "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../ERCAbstract.sol";
 
 /// @notice Abstract contract that defines internal functions that are used in ERC20 test suite

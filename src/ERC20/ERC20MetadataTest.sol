@@ -2,7 +2,7 @@
 pragma solidity >=0.6.2 <0.9.0;
 
 import "forge-std/Test.sol";
-import "openzeppelin-contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 /// @dev This test contract extracts metadata from an ERC20 token. 
 /// @dev The information is contained in the JSON-output.
